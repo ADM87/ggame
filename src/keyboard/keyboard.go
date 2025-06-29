@@ -59,7 +59,7 @@ func UnregisterKey(key ebiten.Key) {
 	}
 }
 
-func Ping() error {
+func Update() error {
 	for key, actions := range keyRegistry {
 		switch {
 		case inpututil.IsKeyJustPressed(key):
@@ -90,6 +90,5 @@ func Ping() error {
 			return nil
 		}
 	}
-
 	return nil
 }

@@ -8,7 +8,13 @@
 !go.mod
 !go.sum
 
-!main.go
+!generate.go
+
+!cmd/
+!cmd/**/*
+
+!resources/
+!resources/**/*
 
 !src/
 !src/**/*
