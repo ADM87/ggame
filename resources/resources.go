@@ -3,75 +3,20 @@ package resources
 import (
 	"embed"
 	"encoding/json"
-	"io/fs"
-	"os"
 	"path/filepath"
 
-	"github.com/ADM87/ggame/src/sys"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-//go:embed static/*
-var StaticResources embed.FS
+var (
+	//go:embed static/*
+	staticResources embed.FS
+	manifest        ResourceManifest
 
-var imageCache = make(map[string]*ebiten.Image)
-
-var manifest *ResourceManifest
-
-var resourceFolder = "resources"
-var missingImageName = "10x10"
-
-func LoadImage(name string) (*ebiten.Image, error) {
-	if img, exists := imageCache[name]; exists {
-		return img, nil
-	}
-
-	if manifest == nil {
-		return nil, os.ErrNotExist
-	}
-
-	var file fs.File
-	var err error
-
-	if resource, exists := manifest.Static[name]; exists {
-		path := filepath.Join("static", resource.Path)
-		file, err = StaticResources.Open(path)
-		if err != nil {
-			return nil, err
-		}
-	} else if resource, exists := manifest.Dynamic[name]; exists {
-		path := filepath.Join(resourceFolder, "dynamic", resource.Path)
-		file, err = os.Open(path)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		sys.Logger().Warnf("Resource '%s' not found in manifest, returning missing image", name)
-		return LoadImage(missingImageName)
-	}
-	defer func() {
-		if err := file.Close(); err != nil {
-			panic("Failed to close file: " + err.Error())
-		}
-	}()
-
-	img, _, err := ebitenutil.NewImageFromReader(file)
-	if err != nil {
-		return nil, err
-	}
-	imageCache[name] = img
-
-	return img, nil
-}
-
-func UnloadImage(path string) error {
-	if img, exists := imageCache[path]; exists {
-		delete(imageCache, path)
-		img.Deallocate()
-	}
-	return nil
-}
+	imageCache       = make(map[string]*ebiten.Image)
+	resourceFolder   = "resources"
+	missingImageName = "10x10"
+)
 
 func Initialize(rootDir string) error {
 	resPath, err := filepath.Abs(filepath.Join(rootDir, resourceFolder))
@@ -80,13 +25,13 @@ func Initialize(rootDir string) error {
 	}
 	resourceFolder = resPath
 
-	manifestFile, err := StaticResources.Open("static/manifest.json")
+	manifestFile, err := staticResources.Open("static/manifest.json")
 	if err != nil {
 		return err
 	}
 	defer manifestFile.Close()
 
-	manifestData, err := StaticResources.ReadFile("static/manifest.json")
+	manifestData, err := staticResources.ReadFile("static/manifest.json")
 	if err != nil {
 		return err
 	}
@@ -95,11 +40,10 @@ func Initialize(rootDir string) error {
 	}
 
 	for name := range manifest.Static {
-		img, err := LoadImage(name)
+		_, err := LoadImage(name)
 		if err != nil {
 			return err
 		}
-		imageCache[name] = img
 	}
 
 	return nil
