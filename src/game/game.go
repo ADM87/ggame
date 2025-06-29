@@ -37,6 +37,22 @@ func (g *gameshell) Start() error {
 		sys.ShutdownWith(0)
 		return nil
 	})
+	keyboard.RegisterKey(ebiten.KeyArrowUp, keyboard.KeyPhaseHeld, func() error {
+		g.gameCamera.MoveBy(0, -1)
+		return nil
+	})
+	keyboard.RegisterKey(ebiten.KeyArrowDown, keyboard.KeyPhaseHeld, func() error {
+		g.gameCamera.MoveBy(0, 1)
+		return nil
+	})
+	keyboard.RegisterKey(ebiten.KeyArrowLeft, keyboard.KeyPhaseHeld, func() error {
+		g.gameCamera.MoveBy(-1, 0)
+		return nil
+	})
+	keyboard.RegisterKey(ebiten.KeyArrowRight, keyboard.KeyPhaseHeld, func() error {
+		g.gameCamera.MoveBy(1, 0)
+		return nil
+	})
 	return ebiten.RunGame(g)
 }
 

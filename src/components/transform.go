@@ -6,6 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Transform defines the interface for a transform component that can be used to manipulate position, rotation, scale, and origin.
 type Transform interface {
 	AddChild(child Transform)      // AddChild adds a child transform to the current transform
 	RemoveChild(child Transform)   // RemoveChild removes a child transform from the current transform
@@ -22,6 +23,7 @@ type Transform interface {
 	Origin() (ox, oy float64)      // Origin returns the origin point of the transform
 	SetOrigin(ox, oy float64)      // SetOrigin sets the origin point of the transform
 	SetDirty()                     // SetDirty marks the transform as dirty, indicating it has changed
+	IsDirty() bool                 // IsDirty checks if the transform is dirty, meaning it has changed since the last update
 }
 
 type transform struct {
@@ -137,6 +139,10 @@ func (t *transform) SetDirty() {
 	for _, child := range t.children {
 		child.SetDirty() // Mark all children as dirty as well
 	}
+}
+
+func (t *transform) IsDirty() bool {
+	return t.isDirty
 }
 
 func (t *transform) Position() (x, y float64) {

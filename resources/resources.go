@@ -25,12 +25,6 @@ func Initialize(rootDir string) error {
 	}
 	resourceFolder = resPath
 
-	manifestFile, err := staticResources.Open("static/manifest.json")
-	if err != nil {
-		return err
-	}
-	defer manifestFile.Close()
-
 	manifestData, err := staticResources.ReadFile("static/manifest.json")
 	if err != nil {
 		return err
