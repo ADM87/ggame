@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ADM87/ggame/src/sys"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -19,6 +20,7 @@ var imageCache = make(map[string]*ebiten.Image)
 var manifest *ResourceManifest
 
 var resourceFolder = "resources"
+var missingImageName = "10x10"
 
 func LoadImage(name string) (*ebiten.Image, error) {
 	if img, exists := imageCache[name]; exists {
@@ -45,7 +47,8 @@ func LoadImage(name string) (*ebiten.Image, error) {
 			return nil, err
 		}
 	} else {
-		return nil, os.ErrNotExist
+		sys.Logger().Warnf("Resource '%s' not found in manifest, returning missing image", name)
+		return LoadImage(missingImageName)
 	}
 	defer func() {
 		if err := file.Close(); err != nil {
