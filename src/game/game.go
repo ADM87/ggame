@@ -1,53 +1,41 @@
 package game
 
 import (
-	"io"
-
+	"github.com/ADM87/ggame/src/game/loop"
+	"github.com/ADM87/ggame/src/game/renderer"
+	"github.com/ADM87/ggame/src/game/window"
+	"github.com/ADM87/ggame/src/keyboard"
 	"github.com/ADM87/ggame/src/sys"
-	"github.com/ADM87/ggame/src/sys/logger"
-	"github.com/ADM87/ggame/src/sys/types"
-	"github.com/hajimehoshi/ebiten"
-	"github.com/spf13/cobra"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type ggame struct {
-	Loop
-	Renderer
-	Window
+const (
+	GameScreenWidth  = 640
+	GameScreenHeight = 480
+)
+
+type Game interface {
+	Start() error
 }
 
-var (
-	windowWidth  = types.NewCmdArg("window-width", "", "Width of the game window", 640, false)
-	windowHeight = types.NewCmdArg("window-height", "", "Height of the game window", 480, false)
-)
+type gameshell struct {
+	loop.Loop
+	renderer.Renderer
+	window.Window
+}
 
-func Start(version string) error {
-	gameCmd := &cobra.Command{
-		Use:   "ggame",
-		Short: "Starts ggame",
-		PreRun: func(cmd *cobra.Command, args []string) {
-			sys.SetVersion(version)
-			sys.Logger().MapWriters(map[logger.LogLevel]io.Writer{
-				logger.LevelError: cmd.OutOrStderr(),
-				logger.LevelWarn:  cmd.OutOrStderr(),
-				logger.LevelInfo:  cmd.OutOrStdout(),
-				logger.LevelDebug: cmd.OutOrStdout(),
-			})
-			sys.Logger().SetVerboseLevel(logger.LevelAll)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ebiten.SetWindowSize(windowWidth.GetValue(), windowHeight.GetValue())
-			ebiten.SetWindowTitle("ggame")
-			return ebiten.RunGame(&ggame{
-				Loop:     NewGameLoop(),
-				Renderer: NewGameRenderer(),
-				Window:   NewGameWindow(windowWidth.GetValue(), windowHeight.GetValue()),
-			})
-		},
+func NewGame(windowWidth, windowHeight int) Game {
+	return &gameshell{
+		Loop:     loop.NewGameLoop(),
+		Renderer: renderer.NewGameRenderer(GameScreenWidth, GameScreenHeight),
+		Window:   window.NewGameWindow(GameScreenWidth, GameScreenHeight),
 	}
+}
 
-	windowWidth.RegisterWith(gameCmd.Flags().IntVarP)
-	windowHeight.RegisterWith(gameCmd.Flags().IntVarP)
-
-	return gameCmd.Execute()
+func (g *gameshell) Start() error {
+	keyboard.RegisterKey(ebiten.KeyEscape, keyboard.KeyPhaseDown, func() error {
+		sys.Shutdown()
+		return nil
+	})
+	return ebiten.RunGame(g)
 }

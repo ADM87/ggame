@@ -60,3 +60,17 @@ func Version() string {
 func SetVersion(v string) {
 	sysVersion = v
 }
+
+// =======================================================================
+// System Methods
+// =======================================================================
+
+func Shutdown() {
+	Logger().Info("Shutting down...")
+	os.Exit(0)
+}
+
+func ShutdownWith(code int) {
+	Logger().Infof("Shutting down with exit code %d...", code)
+	os.Exit(code)
+}
