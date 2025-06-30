@@ -1,26 +1,34 @@
 package game
 
 import (
-	"github.com/ADM87/ggame/resources"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
+
+var op = ebiten.DrawImageOptions{
+	Filter: ebiten.FilterNearest,
+}
 
 func (g *gameshell) Draw(renderTarget *ebiten.Image) {
 	renderTarget.Fill(backgroundColor)
 
 	view := g.gameCamera.GetViewMatrix()
 
-	img, err := resources.LoadImage("tile_0000")
-	if err != nil {
-		ebitenutil.DebugPrint(renderTarget, "Error loading image: "+err.Error())
-		return
+	var mat ebiten.GeoM
+	for _, actor := range g.actors {
+		mat = actor.Transform().Matrix()
+		drawImage(renderTarget, actor.Renderer().GetImage(), &view, &mat)
 	}
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM = view
-
-	renderTarget.DrawImage(img, op)
+	mat = g.player.Transform().Matrix()
+	drawImage(renderTarget, g.player.Renderer().GetImage(), &view, &mat)
 
 	ebitenutil.DebugPrint(renderTarget, "Press ESC to exit")
+}
+
+func drawImage(renderTarget *ebiten.Image, image *ebiten.Image, view *ebiten.GeoM, matrix *ebiten.GeoM) {
+	op.GeoM.Reset()
+	op.GeoM.Concat(*view)
+	op.GeoM.Concat(*matrix)
+	renderTarget.DrawImage(image, &op)
 }

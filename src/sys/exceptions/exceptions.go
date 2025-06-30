@@ -43,3 +43,25 @@ func IsInvalidCommand(err error) bool {
 func (e InvalidCommandException) Error() string {
 	return string(e)
 }
+
+// =======================================================================
+// Invalid Argument Exception
+// =======================================================================
+type InvalidArgumentException string
+
+func InvalidArgument() InvalidArgumentException {
+	return InvalidArgumentException("Invalid argument")
+}
+
+func InvalidArgumentWith(name, message string) InvalidArgumentException {
+	return InvalidArgumentException("Invalid argument: " + name + ": " + message)
+}
+
+func IsInvalidArgument(err error) bool {
+	_, ok := err.(InvalidArgumentException)
+	return ok
+}
+
+func (e InvalidArgumentException) Error() string {
+	return string(e)
+}
