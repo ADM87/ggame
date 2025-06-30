@@ -10,13 +10,14 @@ import (
 var op = &ebiten.DrawImageOptions{
 	Filter: ebiten.FilterNearest,
 }
+var identityMatrix = ebiten.GeoM{}
 
 func (g *gameshell) Draw(renderTarget *ebiten.Image) {
 	renderTarget.Fill(backgroundColor)
 
-	view := g.gameCamera.GetViewMatrix()
-	for _, actor := range g.actors {
-		actor.Renderer().Render(renderTarget, view, actor.Transform().Matrix(), op)
+	viewMatrix := g.gameCamera.GetViewMatrix()
+	for _, entity := range g.entities {
+		entity.Render(renderTarget, viewMatrix, identityMatrix, op)
 	}
 
 	ebitenutil.DebugPrint(renderTarget, fmt.Sprintf("TPS: %0.2f\nFPS: %0.2f", ebiten.ActualTPS(), ebiten.ActualFPS()))

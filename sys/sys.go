@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/ADM87/ggame/src/sys/logger"
+	"github.com/ADM87/ggame/sys/logger"
 )
 
 // =======================================================================

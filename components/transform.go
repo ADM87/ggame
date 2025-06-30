@@ -1,17 +1,11 @@
 package components
 
 import (
-	"slices"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Transform defines the interface for a transform component that can be used to manipulate position, rotation, scale, and origin.
 type Transform interface {
-	AddChild(child Transform)      // AddChild adds a child transform to the current transform
-	RemoveChild(child Transform)   // RemoveChild removes a child transform from the current transform
-	Parent() Transform             // Parent returns the parent transform of the current transform
-	SetParent(parent Transform)    // SetParent sets the parent transform of the current transform
 	Matrix() ebiten.GeoM           // Matrix returns the transformation matrix for the transform
 	Position() (x, y float64)      // Position returns the current position of the transform
 	SetPosition(x, y float64)      // SetPosition sets the position of the transform
@@ -55,32 +49,11 @@ func NewTransform(x, y float64) Transform {
 }
 
 func (t *transform) AddChild(child Transform) {
-	if child == t {
-		panic("Cannot add a transform as its own child")
-	}
 
-	if child == nil {
-		panic("Cannot add a nil transform as a child")
-	}
-
-	if slices.Index(t.children, child) > -1 {
-		return // Child already exists, no need to add again
-	}
-
-	t.children = append(t.children, child)
 }
 
 func (t *transform) RemoveChild(child Transform) {
-	if child == nil {
-		return // Nothing to remove
-	}
 
-	index := slices.Index(t.children, child)
-	if index == -1 {
-		return // Child not found, nothing to remove
-	}
-
-	t.children = append(t.children[:index], t.children[index+1:]...)
 }
 
 func (t *transform) Parent() Transform {
@@ -88,31 +61,7 @@ func (t *transform) Parent() Transform {
 }
 
 func (t *transform) SetParent(parent Transform) {
-	if parent == t {
-		panic("Cannot set a transform as its own parent")
-	}
 
-	if parent == nil {
-		t.parent = nil
-		return // No parent to set
-	}
-
-	if t.hasAncestryOf(parent) {
-		panic("Cannot set a parent that is an ancestor of the transform")
-	}
-
-	if t.parent == parent {
-		return
-	}
-
-	if t.parent != nil {
-		t.parent.RemoveChild(t)
-	}
-
-	t.parent = parent
-	parent.AddChild(t)
-
-	t.SetDirty()
 }
 
 func (t *transform) Matrix() ebiten.GeoM {
@@ -126,9 +75,9 @@ func (t *transform) Matrix() ebiten.GeoM {
 	t.matrix.Rotate(t.radians)       // Apply rotation
 	t.matrix.Translate(t.x, t.y)     // Translate to position
 
-	if t.parent != nil {
-		t.matrix.Concat(t.parent.Matrix())
-	}
+	// if t.parent != nil {
+	// 	t.matrix.Concat(t.parent.Matrix())
+	// }
 
 	t.isDirty = false
 	return t.matrix
@@ -196,15 +145,4 @@ func (t *transform) SetOrigin(ox, oy float64) {
 	}
 	t.ox, t.oy = ox, oy
 	t.SetDirty()
-}
-
-func (t *transform) hasAncestryOf(parent Transform) bool {
-	p := t.parent
-	for p != nil {
-		if p == parent {
-			return true
-		}
-		p = p.Parent()
-	}
-	return false
 }

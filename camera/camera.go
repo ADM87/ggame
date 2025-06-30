@@ -1,7 +1,7 @@
 package camera
 
 import (
-	"github.com/ADM87/ggame/src/components"
+	"github.com/ADM87/ggame/components"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

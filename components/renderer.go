@@ -1,19 +1,19 @@
 package components
 
 import (
-	"github.com/ADM87/ggame/src/sys/types"
+	"github.com/ADM87/ggame/sys/types"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Renderer defines the interface for basic rendering components
 type Renderer interface {
-	types.Disposable // Disposable interface for resource management
+	types.Disposable // Disposable extends the Disposable interface for resource management
 
 	Render(target *ebiten.Image, viewMatrix ebiten.GeoM, transformMatrix ebiten.GeoM, op *ebiten.DrawImageOptions) // Render draws the component onto the target using the provided matrices and options
 }
 
 type SpriteRenderer interface {
-	Renderer // SpriteRenderer embeds the Renderer interface to provide rendering capabilities
+	Renderer // SpriteRenderer extends the Renderer interface
 
 	GetImage() *ebiten.Image    // GetImage retrieves the image used for rendering
 	SetImage(img *ebiten.Image) // SetImage sets the image used for rendering
@@ -35,8 +35,8 @@ func (r *renderer) Render(target *ebiten.Image, viewMatrix ebiten.GeoM, transfor
 	// Default implementation does nothing
 }
 
-func (r *renderer) Dispose() error {
-	return nil
+func (r *renderer) Dispose() {
+	// Default implementation does nothing
 }
 
 // =======================================================================
@@ -75,7 +75,7 @@ func (sr *spriteRenderer) Render(target *ebiten.Image, viewMatrix ebiten.GeoM, t
 	target.DrawImage(sr.image, op)
 }
 
-func (sr *spriteRenderer) Dispose() error {
+func (sr *spriteRenderer) Dispose() {
+	sr.Renderer.Dispose()
 	sr.image = nil
-	return nil
 }

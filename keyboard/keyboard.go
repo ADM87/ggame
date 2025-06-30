@@ -1,7 +1,7 @@
 package keyboard
 
 import (
-	"github.com/ADM87/ggame/src/sys"
+	"github.com/ADM87/ggame/sys"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )

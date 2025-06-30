@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	models "github.com/ADM87/ggame/resources"
-	"github.com/ADM87/ggame/src/sys/types"
+	"github.com/ADM87/ggame/sys/types"
 	"github.com/spf13/cobra"
 )
 

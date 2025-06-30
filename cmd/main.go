@@ -5,12 +5,12 @@ import (
 
 	resCmd "github.com/ADM87/ggame/cmd/resources"
 
+	"github.com/ADM87/ggame/game"
 	"github.com/ADM87/ggame/resources"
-	"github.com/ADM87/ggame/src/game"
-	"github.com/ADM87/ggame/src/sys"
-	"github.com/ADM87/ggame/src/sys/exceptions"
-	"github.com/ADM87/ggame/src/sys/logger"
-	"github.com/ADM87/ggame/src/sys/types"
+	"github.com/ADM87/ggame/sys"
+	"github.com/ADM87/ggame/sys/exceptions"
+	"github.com/ADM87/ggame/sys/logger"
+	"github.com/ADM87/ggame/sys/types"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/spf13/cobra"
 )

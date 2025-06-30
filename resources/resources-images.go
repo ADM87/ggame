@@ -5,11 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ADM87/ggame/src/sys"
+	"github.com/ADM87/ggame/sys"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+// LoadImage loads an image resource by its name from the static or dynamic resources.
+//
+// LoadImage will first check if the requested image has already been loaded and cached.
 func LoadImage(name string) (*ebiten.Image, error) {
 	if img, exists := imageCache[name]; exists {
 		return img, nil
@@ -31,7 +34,7 @@ func LoadImage(name string) (*ebiten.Image, error) {
 			return nil, err
 		}
 	} else {
-		sys.Logger().Warnf("Resource '%s' not found in manifest, returning missing image", name)
+		sys.Logger().Warnf("Resource '%s' not found in manifest, falling back to missing image resource", name)
 		return LoadImage(missingImageName)
 	}
 	defer func() {

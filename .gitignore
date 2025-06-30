@@ -10,11 +10,29 @@
 
 !generate.go
 
+!camera/
+!camera/**/*
+
 !cmd/
 !cmd/**/*
+
+!components/
+!components/**/*
+
+!game/
+!game/**/*
+
+!keyboard/
+!keyboard/**/*
+
+!objects/
+!objects/**/*
 
 !resources/
 !resources/**/*
 
-!src/
-!src/**/*
+!sys/
+!sys/**/*
+
+!world/
+!world/**/*
