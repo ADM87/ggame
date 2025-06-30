@@ -6,18 +6,17 @@ import (
 
 // Transform defines the interface for a transform component that can be used to manipulate position, rotation, scale, and origin.
 type Transform interface {
-	Matrix() ebiten.GeoM           // Matrix returns the transformation matrix for the transform
-	Position() (x, y float64)      // Position returns the current position of the transform
-	SetPosition(x, y float64)      // SetPosition sets the position of the transform
-	WorldPosition() (x, y float64) // WorldPosition returns the world position of the transform, taking into account its parent transforms
-	Rotation() float64             // Rotation returns the rotation of the transform in radians
-	SetRotation(radians float64)   // SetRotation sets the rotation of the transform in radians
-	Scale() (sx, sy float64)       // Scale returns the scale of the transform
-	SetScale(sx, sy float64)       // SetScale sets the scale of the transform
-	Origin() (ox, oy float64)      // Origin returns the origin point of the transform
-	SetOrigin(ox, oy float64)      // SetOrigin sets the origin point of the transform
-	SetDirty()                     // SetDirty marks the transform as dirty, indicating it has changed
-	IsDirty() bool                 // IsDirty checks if the transform is dirty, meaning it has changed since the last update
+	Matrix() ebiten.GeoM         // Matrix returns the transformation matrix for the transform
+	IsDirty() bool               // IsDirty checks if the transform is dirty, meaning it has changed since the last update
+	Origin() (ox, oy float64)    // Origin returns the origin point of the transform
+	Position() (x, y float64)    // Position returns the current position of the transform
+	Rotation() float64           // Rotation returns the rotation of the transform in radians
+	Scale() (sx, sy float64)     // Scale returns the scale of the transform
+	SetDirty()                   // SetDirty marks the transform as dirty, indicating it has changed
+	SetOrigin(ox, oy float64)    // SetOrigin sets the origin point of the transform
+	SetPosition(x, y float64)    // SetPosition sets the position of the transform
+	SetRotation(radians float64) // SetRotation sets the rotation of the transform in radians
+	SetScale(sx, sy float64)     // SetScale sets the scale of the transform
 }
 
 type transform struct {
@@ -48,22 +47,6 @@ func NewTransform(x, y float64) Transform {
 	}
 }
 
-func (t *transform) AddChild(child Transform) {
-
-}
-
-func (t *transform) RemoveChild(child Transform) {
-
-}
-
-func (t *transform) Parent() Transform {
-	return t.parent
-}
-
-func (t *transform) SetParent(parent Transform) {
-
-}
-
 func (t *transform) Matrix() ebiten.GeoM {
 	if !t.isDirty {
 		return t.matrix
@@ -74,10 +57,6 @@ func (t *transform) Matrix() ebiten.GeoM {
 	t.matrix.Scale(t.sx, t.sy)       // Apply scale
 	t.matrix.Rotate(t.radians)       // Apply rotation
 	t.matrix.Translate(t.x, t.y)     // Translate to position
-
-	// if t.parent != nil {
-	// 	t.matrix.Concat(t.parent.Matrix())
-	// }
 
 	t.isDirty = false
 	return t.matrix
@@ -96,11 +75,6 @@ func (t *transform) IsDirty() bool {
 
 func (t *transform) Position() (x, y float64) {
 	return t.x, t.y
-}
-
-func (t *transform) WorldPosition() (x, y float64) {
-	m := t.Matrix()
-	return m.Apply(0, 0)
 }
 
 func (t *transform) SetPosition(x, y float64) {
