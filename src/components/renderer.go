@@ -9,7 +9,6 @@ import (
 
 // Renderer defines the interface for basic rendering components
 type Renderer interface {
-	Component        // Renderer embeds the Component interface to provide a unique ID for the renderer
 	types.Disposable // Disposable interface for resource management
 
 	GetColor() color.Color  // GetColor retrieves the current color used for rendering
@@ -21,15 +20,13 @@ type Renderer interface {
 // =======================================================================
 
 type renderer struct {
-	Component // Component embeds the Component interface to provide a unique ID for the renderer
-	color     color.Color
+	color color.Color
 }
 
 // NewRenderer creates a basic renderer with a default color.
 func NewRenderer() Renderer {
 	return &renderer{
-		Component: NewComponent(RenderComponentID), // Assign a unique ID for the renderer component
-		color:     color.RGBA{255, 255, 255, 255},
+		color: color.RGBA{255, 255, 255, 255},
 	}
 }
 

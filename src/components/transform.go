@@ -8,8 +8,6 @@ import (
 
 // Transform defines the interface for a transform component that can be used to manipulate position, rotation, scale, and origin.
 type Transform interface {
-	Component // Transform embeds the Component interface to provide a unique ID for the transform
-
 	AddChild(child Transform)      // AddChild adds a child transform to the current transform
 	RemoveChild(child Transform)   // RemoveChild removes a child transform from the current transform
 	Parent() Transform             // Parent returns the parent transform of the current transform
@@ -29,8 +27,6 @@ type Transform interface {
 }
 
 type transform struct {
-	Component // Component embeds the Component interface to provide a unique ID for the transform
-
 	x, y     float64     // x and y coordinates of the transform
 	ox, oy   float64     // Origin point of the transform
 	sx, sy   float64     // Scale factors for the transform
@@ -44,18 +40,17 @@ type transform struct {
 // NewTransform creates a new transform component with the specified position
 func NewTransform(x, y float64) Transform {
 	return &transform{
-		Component: NewComponent(TransformComponentID), // Assign a unique ID for the transform component
-		x:         x,
-		y:         y,
-		ox:        0,
-		oy:        0,
-		sx:        1,
-		sy:        1,
-		radians:   0,
-		parent:    nil,
-		children:  []Transform{},
-		isDirty:   true, // Initially dirty to ensure matrix is recalculated
-		matrix:    ebiten.GeoM{},
+		x:        x,
+		y:        y,
+		ox:       0,
+		oy:       0,
+		sx:       1,
+		sy:       1,
+		radians:  0,
+		parent:   nil,
+		children: []Transform{},
+		isDirty:  true, // Initially dirty to ensure matrix is recalculated
+		matrix:   ebiten.GeoM{},
 	}
 }
 

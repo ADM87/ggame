@@ -2,6 +2,7 @@ package game
 
 import (
 	"image/color"
+	"math/rand/v2"
 
 	"github.com/ADM87/ggame/resources"
 	"github.com/ADM87/ggame/src/camera"
@@ -54,14 +55,15 @@ func (g *gameshell) Start() error {
 	testRenderer := components.NewSpriteRenderer()
 	testRenderer.SetImage(testImage)
 
-	g.player = createTestActor(testRenderer, float64(ScreenWidth)/2, float64(ScreenHeight)/2)
-	g.actors = make([]objects.Actor, 10)
-
-	for i := 0; i < len(g.actors); i++ {
-		x := float64(i%5) * 32
-		y := float64(i/5) * 32
-		g.actors[i] = createTestActor(testRenderer, x, y)
+	g.actors = make([]objects.Actor, 0)
+	for range 10 {
+		x := 30 + rand.Float64()*float64(ScreenWidth-60)
+		y := 30 + rand.Float64()*float64(ScreenHeight-60)
+		g.actors = append(g.actors, createTestActor(testRenderer, x, y))
 	}
+
+	g.player = createTestActor(testRenderer, float64(ScreenWidth)/2, float64(ScreenHeight)/2)
+	g.actors = append(g.actors, g.player)
 
 	keyboard.RegisterKey(ebiten.KeyEscape, keyboard.KeyPhaseDown, func() error {
 		sys.ShutdownWith(0)

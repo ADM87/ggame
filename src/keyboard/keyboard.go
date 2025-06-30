@@ -64,21 +64,18 @@ func Update() error {
 		switch {
 		case inpututil.IsKeyJustPressed(key):
 			if action, exists := actions[KeyPhaseDown]; exists {
-				sys.Logger().Debugf("Key %s pressed, executing action for phase %s", key, KeyPhaseDown)
 				if err := action(); err != nil {
 					return err
 				}
 			}
 		case inpututil.IsKeyJustReleased(key):
 			if action, exists := actions[KeyPhaseUp]; exists {
-				sys.Logger().Debugf("Key %s released, executing action for phase %s", key, KeyPhaseUp)
 				if err := action(); err != nil {
 					return err
 				}
 			}
 		case ebiten.IsKeyPressed(key):
 			if action, exists := actions[KeyPhaseHeld]; exists {
-				sys.Logger().Debugf("Key %s is held down, executing action for phase %s", key, KeyPhaseHeld)
 				if err := action(); err != nil {
 					return err
 				}
