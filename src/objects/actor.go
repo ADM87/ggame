@@ -5,19 +5,21 @@ import (
 	"github.com/ADM87/ggame/src/sys/types"
 )
 
-// Actor defines an interface for a visual entity in the game with an update cycle
+// Actor defines an interface renderable entity.
+//
+// Renderers assigned to the actor are not disposed of when the actor is disposed, as they are not the owners of the renderer but are just assigned to it.
 type Actor interface {
 	types.Disposable // Actor extends the Disposable interface for resource management
 	Entity           // Actor extends the Entity interface
 
-	Renderer() components.SpriteRenderer            // Renderer returns the SpriteRenderer interface for rendering capabilities
-	SetRenderer(renderer components.SpriteRenderer) // SetRenderer sets the SpriteRenderer for the actor
+	Renderer() components.Renderer            // Renderer returns the assigned Renderer of the actor
+	SetRenderer(renderer components.Renderer) // SetRenderer assigns a Renderer to the actor
 }
 
 type actor struct {
 	Entity
 
-	renderer components.SpriteRenderer
+	renderer components.Renderer
 }
 
 func NewActor() Actor {
@@ -27,17 +29,15 @@ func NewActor() Actor {
 	}
 }
 
-func (a *actor) Renderer() components.SpriteRenderer {
+func (a *actor) Renderer() components.Renderer {
 	return a.renderer
 }
 
-func (a *actor) SetRenderer(renderer components.SpriteRenderer) {
+func (a *actor) SetRenderer(renderer components.Renderer) {
 	a.renderer = renderer
 }
 
 func (a *actor) Dispose() error {
-	if a.renderer == nil {
-		return nil
-	}
-	return a.renderer.Dispose()
+	a.renderer = nil
+	return nil
 }

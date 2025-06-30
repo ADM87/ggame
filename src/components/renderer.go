@@ -1,8 +1,6 @@
 package components
 
 import (
-	"image/color"
-
 	"github.com/ADM87/ggame/src/sys/types"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -11,8 +9,14 @@ import (
 type Renderer interface {
 	types.Disposable // Disposable interface for resource management
 
-	GetColor() color.Color  // GetColor retrieves the current color used for rendering
-	SetColor(c color.Color) // SetColor sets the color used for rendering
+	Render(target *ebiten.Image, viewMatrix ebiten.GeoM, transformMatrix ebiten.GeoM, op *ebiten.DrawImageOptions) // Render draws the component onto the target using the provided matrices and options
+}
+
+type SpriteRenderer interface {
+	Renderer // SpriteRenderer embeds the Renderer interface to provide rendering capabilities
+
+	GetImage() *ebiten.Image    // GetImage retrieves the image used for rendering
+	SetImage(img *ebiten.Image) // SetImage sets the image used for rendering
 }
 
 // =======================================================================
@@ -20,22 +24,15 @@ type Renderer interface {
 // =======================================================================
 
 type renderer struct {
-	color color.Color
 }
 
 // NewRenderer creates a basic renderer with a default color.
 func NewRenderer() Renderer {
-	return &renderer{
-		color: color.RGBA{255, 255, 255, 255},
-	}
+	return &renderer{}
 }
 
-func (r *renderer) GetColor() color.Color {
-	return r.color
-}
-
-func (r *renderer) SetColor(c color.Color) {
-	r.color = c
+func (r *renderer) Render(target *ebiten.Image, viewMatrix ebiten.GeoM, transformMatrix ebiten.GeoM, op *ebiten.DrawImageOptions) {
+	// Default implementation does nothing
 }
 
 func (r *renderer) Dispose() error {
@@ -45,13 +42,6 @@ func (r *renderer) Dispose() error {
 // =======================================================================
 // Sprite Renderer
 // =======================================================================
-
-type SpriteRenderer interface {
-	Renderer // SpriteRenderer embeds the Renderer interface to provide rendering capabilities
-
-	GetImage() *ebiten.Image    // GetImage retrieves the image used for rendering
-	SetImage(img *ebiten.Image) // SetImage sets the image used for rendering
-}
 
 type spriteRenderer struct {
 	Renderer // Renderer embeds the Renderer interface to provide rendering capabilities
@@ -72,6 +62,17 @@ func (sr *spriteRenderer) GetImage() *ebiten.Image {
 
 func (sr *spriteRenderer) SetImage(img *ebiten.Image) {
 	sr.image = img
+}
+
+func (sr *spriteRenderer) Render(target *ebiten.Image, viewMatrix ebiten.GeoM, transformMatrix ebiten.GeoM, op *ebiten.DrawImageOptions) {
+	if sr.image == nil {
+		return
+	}
+
+	op.GeoM = transformMatrix
+	op.GeoM.Concat(viewMatrix)
+
+	target.DrawImage(sr.image, op)
 }
 
 func (sr *spriteRenderer) Dispose() error {

@@ -56,7 +56,7 @@ func (g *gameshell) Start() error {
 	testRenderer.SetImage(testImage)
 
 	g.actors = make([]objects.Actor, 0)
-	for range 10 {
+	for range 100 {
 		x := 30 + rand.Float64()*float64(ScreenWidth-60)
 		y := 30 + rand.Float64()*float64(ScreenHeight-60)
 		g.actors = append(g.actors, createTestActor(testRenderer, x, y))

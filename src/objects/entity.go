@@ -2,7 +2,7 @@ package objects
 
 import "github.com/ADM87/ggame/src/components"
 
-// Entity defines the interface for game entities that can be transformed
+// Entity defines a basic interface for an object within the game world
 type Entity interface {
 	Transform() components.Transform // Transform returns the Transform interface for position and transformation capabilities
 }

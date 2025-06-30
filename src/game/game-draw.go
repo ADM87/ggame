@@ -1,11 +1,13 @@
 package game
 
 import (
-	"github.com/ADM87/ggame/src/components"
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-var op = ebiten.DrawImageOptions{
+var op = &ebiten.DrawImageOptions{
 	Filter: ebiten.FilterNearest,
 }
 
@@ -14,13 +16,8 @@ func (g *gameshell) Draw(renderTarget *ebiten.Image) {
 
 	view := g.gameCamera.GetViewMatrix()
 	for _, actor := range g.actors {
-		drawImage(renderTarget, actor.Renderer().GetImage(), view, actor.Transform())
+		actor.Renderer().Render(renderTarget, view, actor.Transform().Matrix(), op)
 	}
-}
 
-func drawImage(renderTarget *ebiten.Image, image *ebiten.Image, view ebiten.GeoM, transform components.Transform) {
-	op.GeoM.Reset()
-	op.GeoM.Concat(transform.Matrix())
-	op.GeoM.Concat(view)
-	renderTarget.DrawImage(image, &op)
+	ebitenutil.DebugPrint(renderTarget, fmt.Sprintf("TPS: %0.2f\nFPS: %0.2f", ebiten.ActualTPS(), ebiten.ActualFPS()))
 }
