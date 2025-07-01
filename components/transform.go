@@ -43,10 +43,9 @@ func NewTransform() ITransform {
 func (t *transform) Matrix() ebiten.GeoM {
 	if t.isDirty {
 		t.matrix.Reset()
-		t.matrix.Translate(-t.ox, -t.oy) // Translate to origin
-		t.matrix.Rotate(t.radians)       // Apply rotation
-		t.matrix.Scale(t.sx, t.sy)       // Apply scale
-		t.matrix.Translate(t.x, t.y)     // Translate to position first
+		t.matrix.Rotate(t.radians)   // Apply rotation
+		t.matrix.Scale(t.sx, t.sy)   // Apply scale
+		t.matrix.Translate(t.x, t.y) // Translate to position first
 		t.isDirty = false
 	}
 	return t.matrix

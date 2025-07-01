@@ -46,12 +46,6 @@ type IMovable interface {
 	SetPosition(x, y float64) // SetPosition sets the position to the specified coordinates
 }
 
-// IOrigin
-type IOrigin interface {
-	Origin() (ox, oy float64) // Origin retrieves the current origin point
-	SetOrigin(ox, oy float64) // SetOrigin sets the origin point
-}
-
 // IRotatable defines the interface for a component that can be rotated in the game world.
 type IRotatable interface {
 	Rotation() float64           // Rotation retrieves the current rotation in degrees
@@ -67,7 +61,6 @@ type IScalable interface {
 // ITransform defines the interface for a transform component that can be to manipulate position, rotation, scale, and origin.
 type ITransform interface {
 	IMovable   // Embedding Movable interface for position manipulation
-	IOrigin    // Embedding Origin interface for origin manipulation
 	IRotatable // Embedding Rotatable interface for rotation manipulation
 	IScalable  // Embedding Scalable interface for scaling manipulation
 

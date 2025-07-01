@@ -25,15 +25,20 @@ type Game interface {
 }
 
 type gameshell struct {
-	entities []entities.IEntity
-	entity   entities.IEntity // For testing purposes
-	child    entities.IEntity // For testing purposes
+	entities    []entities.IEntity
+	parent      entities.IEntity // For testing purposes
+	child       entities.IEntity // For testing purposes
+	grandchildA entities.IEntity // For testing purposes
+	grandchildB entities.IEntity // For testing purposes
 }
 
 func NewGame() Game {
 	return &gameshell{
-		entities: make([]entities.IEntity, 0),
-		entity:   nil, // Will be set in Start()
+		entities:    make([]entities.IEntity, 0),
+		parent:      nil,
+		child:       nil,
+		grandchildA: nil,
+		grandchildB: nil,
 	}
 }
 
@@ -45,24 +50,34 @@ func (g *gameshell) Start() error {
 
 	tile0000Renderer := components.NewSpriteRenderer()
 	tile0000Renderer.SetImage(tile0000Image)
+	tile0000Renderer.SetAnchor(0.5, 1)
 
 	tile0010Renderer := components.NewSpriteRenderer()
 	tile0010Renderer.SetImage(tile0010Image)
+	tile0010Renderer.SetAnchor(0.5, 0)
+
+	g.grandchildA = entities.NewEntity()
+	g.grandchildA.SetRenderer(tile0000Renderer)
+	g.grandchildA.SetPosition(9, 0)
+	g.grandchildA.SetScale(0.5, 0.5)
+
+	g.grandchildB = entities.NewEntity()
+	g.grandchildB.SetRenderer(tile0000Renderer)
+	g.grandchildB.SetPosition(-9, 0)
+	g.grandchildB.SetScale(0.5, 0.5)
 
 	g.child = entities.NewEntity()
 	g.child.SetRenderer(tile0010Renderer)
-	g.child.SetScale(0.5, 0.5)
-	g.child.SetPosition(0, 0)
-	g.child.SetOrigin(12, 12)
+	g.child.SetPosition(0, 50)
+	g.child.AddChild(g.grandchildA)
+	g.child.AddChild(g.grandchildB)
 
-	g.entity = entities.NewEntity()
-	g.entity.SetRenderer(tile0000Renderer)
-	g.entity.SetPosition(float64(ScreenWidth/2), float64(ScreenHeight/2))
-	g.entity.SetOrigin(12, 12)
-	g.entity.SetScale(2, 2)
-	g.entity.AddChild(g.child)
-	g.entities = append(g.entities, g.entity)
+	g.parent = entities.NewEntity()
+	g.parent.SetRenderer(tile0000Renderer)
+	g.parent.SetPosition(float64(ScreenWidth/2), float64(ScreenHeight/2))
+	g.parent.AddChild(g.child)
 
+	g.entities = append(g.entities, g.parent)
 	return ebiten.RunGame(g)
 }
 

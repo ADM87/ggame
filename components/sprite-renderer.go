@@ -7,6 +7,7 @@ import (
 
 type spriteRenderer struct {
 	ax, ay      float64
+	ox, oy      float64
 	image       *ebiten.Image
 	drawOptions *ebiten.DrawImageOptions
 }
@@ -29,6 +30,11 @@ func (sr *spriteRenderer) Anchor() (ax, ay float64) {
 func (sr *spriteRenderer) SetAnchor(ax, ay float64) {
 	sr.ax = ax
 	sr.ay = ay
+
+	w, h := sr.image.Bounds().Dx(), sr.image.Bounds().Dy()
+
+	sr.ox = float64(w) * ax
+	sr.oy = float64(h) * ay
 }
 
 // =======================================================================
@@ -68,7 +74,9 @@ func (sr *spriteRenderer) Render(target *ebiten.Image, view ebiten.GeoM, matrix 
 		return
 	}
 
-	sr.drawOptions.GeoM = matrix
+	sr.drawOptions.GeoM.Reset()
+	sr.drawOptions.GeoM.Translate(-sr.ox, -sr.oy)
+	sr.drawOptions.GeoM.Concat(matrix)
 	sr.drawOptions.GeoM.Concat(view)
 
 	target.DrawImage(sr.image, sr.drawOptions)

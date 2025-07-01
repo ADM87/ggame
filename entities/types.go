@@ -13,7 +13,6 @@ import (
 // IEntity defines the interface for a game entity that can be transformed, rendered, and managed in a scene graph.
 type IEntity interface {
 	components.IMovable
-	components.IOrigin
 	components.IRender
 	components.IRotatable
 	components.IScalable

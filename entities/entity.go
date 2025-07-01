@@ -32,11 +32,6 @@ func NewEntity() IEntity {
 	}
 }
 
-func (e *entity) SetOrigin(x, y float64) {
-	e.ITransform.SetOrigin(x, y)
-	e.internalSetDirty()
-}
-
 func (e *entity) SetPosition(x, y float64) {
 	e.ITransform.SetPosition(x, y)
 	e.internalSetDirty()

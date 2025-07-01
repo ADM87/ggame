@@ -14,5 +14,5 @@ func (g *gameshell) Draw(renderTarget *ebiten.Image) {
 		entity.Render(renderTarget, ebiten.GeoM{}, ebiten.GeoM{})
 	}
 
-	ebitenutil.DebugPrint(renderTarget, fmt.Sprintf("%0.2f", g.entity.Rotation()))
+	ebitenutil.DebugPrint(renderTarget, fmt.Sprintf("%0.2f", g.parent.Rotation()))
 }
