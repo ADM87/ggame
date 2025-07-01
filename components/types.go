@@ -1,7 +1,6 @@
 package components
 
 import (
-	"github.com/ADM87/ggame/sys/types"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -9,16 +8,14 @@ import (
 // Rendering Interfaces
 // ========================================================================
 
-// IRenderer defines a basic interface for a rendering components
-type IRenderer interface {
-	types.IDisposable // Embedding IDisposable for resource management
-
-	Render(target *ebiten.Image, finalTransform ebiten.GeoM) // Render draws the component onto the target image using the provided transformation matrix
+// IRender defines a basic interface for a rendering components
+type IRender interface {
+	Render(target *ebiten.Image, view ebiten.GeoM, matrix ebiten.GeoM) // Render draws the component onto the target image
 }
 
 // ISpriteRenderer defines the interface for a sprite rendering component
 type ISpriteRenderer interface {
-	IRenderer
+	IRender
 
 	GetImage() *ebiten.Image    // GetImage retrieves the image used for rendering
 	SetImage(img *ebiten.Image) // SetImage sets the image used for rendering

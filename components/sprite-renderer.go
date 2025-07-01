@@ -45,12 +45,18 @@ func (sr *spriteRenderer) SetMipMaps(toggle bool) {
 	sr.drawOptions.DisableMipmaps = !toggle
 }
 
-func (sr *spriteRenderer) Render(target *ebiten.Image, finalTransform ebiten.GeoM) {
+// =======================================================================
+// IRenderer Implementation
+// =======================================================================
+
+func (sr *spriteRenderer) Render(target *ebiten.Image, view ebiten.GeoM, matrix ebiten.GeoM) {
 	if sr.image == nil {
-		return // No image to render
+		return
 	}
 
-	sr.drawOptions.GeoM = finalTransform
+	sr.drawOptions.GeoM = matrix
+	sr.drawOptions.GeoM.Concat(view)
+
 	target.DrawImage(sr.image, sr.drawOptions)
 }
 
