@@ -4,7 +4,8 @@ import "fmt"
 
 type CmdArgRegisterFunc[T any] func(p *T, name string, shortHand string, value T, description string)
 
-type CmdArg interface {
+// ICmdArg defines the interface for a command line argument.
+type ICmdArg interface {
 	String() string
 
 	GetName() string
@@ -15,7 +16,7 @@ type CmdArg interface {
 }
 
 type TypedCmdArg[T any] interface {
-	CmdArg
+	ICmdArg
 
 	GetValue() T
 	SetValue(value T)

@@ -8,14 +8,17 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const (
+	DefaultImageResource = "10x10"
+)
+
 var (
 	//go:embed static/*
 	staticResources embed.FS
 	manifest        ResourceManifest
 
-	imageCache       = make(map[string]*ebiten.Image)
-	resourceFolder   = "resources"
-	missingImageName = "10x10"
+	imageCache     = make(map[string]*ebiten.Image)
+	resourceFolder = "resources"
 )
 
 func Initialize(rootDir string) error {
@@ -33,11 +36,9 @@ func Initialize(rootDir string) error {
 		return err
 	}
 
+	// Load static images so they are ready for use from the start
 	for name := range manifest.Static {
-		_, err := LoadImage(name)
-		if err != nil {
-			return err
-		}
+		LoadImage(name)
 	}
 
 	return nil

@@ -4,74 +4,61 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Transform defines the interface for a transform component that can be used to manipulate position, rotation, scale, and origin.
-type Transform interface {
-	Matrix() ebiten.GeoM         // Matrix returns the transformation matrix for the transform
-	IsDirty() bool               // IsDirty checks if the transform is dirty, meaning it has changed since the last update
-	Origin() (ox, oy float64)    // Origin returns the origin point of the transform
-	Position() (x, y float64)    // Position returns the current position of the transform
-	Rotation() float64           // Rotation returns the rotation of the transform in radians
-	Scale() (sx, sy float64)     // Scale returns the scale of the transform
-	SetDirty()                   // SetDirty marks the transform as dirty, indicating it has changed
-	SetOrigin(ox, oy float64)    // SetOrigin sets the origin point of the transform
-	SetPosition(x, y float64)    // SetPosition sets the position of the transform
-	SetRotation(radians float64) // SetRotation sets the rotation of the transform in radians
-	SetScale(sx, sy float64)     // SetScale sets the scale of the transform
-}
+const (
+	minScale = 0.0001 // Minimum scale to prevent division by zero
+)
 
 type transform struct {
-	x, y     float64     // x and y coordinates of the transform
-	ox, oy   float64     // Origin point of the transform
-	sx, sy   float64     // Scale factors for the transform
-	radians  float64     // Rotation in radians for the transform
-	parent   Transform   // Parent transform of the current transform
-	children []Transform // List of child transforms
-	matrix   ebiten.GeoM // Transformation matrix for the transform
-	isDirty  bool        // isDirty indicates if the transform has changed since the last update
+	x, y    float64     // x and y coordinates of the transform
+	ox, oy  float64     // Origin x and y coordinates for the transform
+	sx, sy  float64     // Scale factors for the transform
+	radians float64     // Rotation in radians for the transform
+	matrix  ebiten.GeoM // Transformation matrix for the transform
+	isDirty bool        // isDirty indicates if the transform has changed since the last update
 }
 
-// NewTransform creates a new transform component with the specified position
-func NewTransform(x, y float64) Transform {
+// NewTransform constructs a new transform component
+func NewTransform() ITransform {
 	return &transform{
-		x:        x,
-		y:        y,
-		ox:       0,
-		oy:       0,
-		sx:       1,
-		sy:       1,
-		radians:  0,
-		parent:   nil,
-		children: []Transform{},
-		isDirty:  true, // Initially dirty to ensure matrix is recalculated
-		matrix:   ebiten.GeoM{},
+		x:       0,
+		y:       0,
+		ox:      0,
+		oy:      0,
+		sx:      1,
+		sy:      1,
+		radians: 0,
+		isDirty: true,
+		matrix:  ebiten.GeoM{},
 	}
 }
+
+// =======================================================================
+// ITransform Interface Implementation
+// =======================================================================
 
 func (t *transform) Matrix() ebiten.GeoM {
-	if !t.isDirty {
-		return t.matrix
+	if t.isDirty {
+		t.matrix.Reset()
+		t.matrix.Translate(-t.ox, -t.oy) // Translate to origin
+		t.matrix.Rotate(t.radians)       // Apply rotation
+		t.matrix.Scale(t.sx, t.sy)       // Apply scale
+		t.matrix.Translate(t.x, t.y)     // Translate to position
+		t.isDirty = false
 	}
-
-	t.matrix.Reset()
-	t.matrix.Translate(-t.ox, -t.oy) // Translate to origin
-	t.matrix.Scale(t.sx, t.sy)       // Apply scale
-	t.matrix.Rotate(t.radians)       // Apply rotation
-	t.matrix.Translate(t.x, t.y)     // Translate to position
-
-	t.isDirty = false
 	return t.matrix
 }
 
 func (t *transform) SetDirty() {
 	t.isDirty = true
-	for _, child := range t.children {
-		child.SetDirty()
-	}
 }
 
 func (t *transform) IsDirty() bool {
 	return t.isDirty
 }
+
+// =======================================================================
+// IMovable Interface Implementation
+// =======================================================================
 
 func (t *transform) Position() (x, y float64) {
 	return t.x, t.y
@@ -79,35 +66,15 @@ func (t *transform) Position() (x, y float64) {
 
 func (t *transform) SetPosition(x, y float64) {
 	if t.x == x && t.y == y {
-		return // No change in position, no need to update
+		return
 	}
 	t.x, t.y = x, y
 	t.SetDirty()
 }
 
-func (t *transform) Rotation() float64 {
-	return t.radians
-}
-
-func (t *transform) SetRotation(radians float64) {
-	if t.radians == radians {
-		return // No change in rotation, no need to update
-	}
-	t.radians = radians
-	t.SetDirty()
-}
-
-func (t *transform) Scale() (sx, sy float64) {
-	return t.sx, t.sy
-}
-
-func (t *transform) SetScale(sx, sy float64) {
-	if t.sx == sx && t.sy == sy {
-		return // No change in scale, no need to update
-	}
-	t.sx, t.sy = sx, sy
-	t.SetDirty()
-}
+// =======================================================================
+// IOrigin Interface Implementation
+// =======================================================================
 
 func (t *transform) Origin() (ox, oy float64) {
 	return t.ox, t.oy
@@ -118,5 +85,43 @@ func (t *transform) SetOrigin(ox, oy float64) {
 		return // No change in origin, no need to update
 	}
 	t.ox, t.oy = ox, oy
+	t.SetDirty()
+}
+
+// =======================================================================
+// IRotatable Interface Implementation
+// =======================================================================
+
+func (t *transform) Rotation() float64 {
+	return t.radians
+}
+
+func (t *transform) SetRotation(radians float64) {
+	if t.radians == radians {
+		return
+	}
+	t.radians = radians
+	t.SetDirty()
+}
+
+// =======================================================================
+// IScalable Interface Implementation
+// =======================================================================
+
+func (t *transform) Scale() (sx, sy float64) {
+	return t.sx, t.sy
+}
+
+func (t *transform) SetScale(sx, sy float64) {
+	if sx < minScale {
+		sx = minScale
+	}
+	if sy < minScale {
+		sy = minScale
+	}
+	if t.sx == sx && t.sy == sy {
+		return
+	}
+	t.sx, t.sy = sx, sy
 	t.SetDirty()
 }

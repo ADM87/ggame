@@ -6,6 +6,5 @@ func (g *gameshell) Update() error {
 	if err := keyboard.Update(); err != nil {
 		return err
 	}
-	g.gameCamera.MoveTo(g.player.Position())
 	return nil
 }
