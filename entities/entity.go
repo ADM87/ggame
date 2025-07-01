@@ -1,4 +1,4 @@
-package objects
+package entities
 
 import (
 	"slices"
@@ -9,6 +9,7 @@ import (
 
 type entity struct {
 	components.ITransform
+	components.IRender
 
 	children []IEntity // List of child entities
 	parent   IEntity   // Parent entity
@@ -19,15 +20,36 @@ type entity struct {
 
 // NewEntity creates a new IEntity instance with default components and properties.
 //
-// Disposing of an entity will also dispose of its children. Referening to a disposed entity will result in unexpected behavior.
+// Disposing of an entity will also dispose of its children. Referening a disposed entity will result in unexpected behavior.
 func NewEntity() IEntity {
 	return &entity{
 		ITransform:       components.NewTransform(),
+		IRender:          nil, // Renderer can be set later
 		children:         make([]IEntity, 0),
 		parent:           nil,
 		worldMatrix:      ebiten.GeoM{},
 		worldMatrixDirty: true,
 	}
+}
+
+func (e *entity) SetOrigin(x, y float64) {
+	e.ITransform.SetOrigin(x, y)
+	e.internalSetDirty()
+}
+
+func (e *entity) SetPosition(x, y float64) {
+	e.ITransform.SetPosition(x, y)
+	e.internalSetDirty()
+}
+
+func (e *entity) SetScale(x, y float64) {
+	e.ITransform.SetScale(x, y)
+	e.internalSetDirty()
+}
+
+func (e *entity) SetRotation(degrees float64) {
+	e.ITransform.SetRotation(degrees)
+	e.internalSetDirty()
 }
 
 func (e *entity) SetDirty() {
@@ -98,6 +120,14 @@ func (e *entity) WorldMatrix() ebiten.GeoM {
 	return e.worldMatrix
 }
 
+func (e *entity) Renderer() components.IRender {
+	return e.IRender
+}
+
+func (e *entity) SetRenderer(renderer components.IRender) {
+	e.IRender = renderer
+}
+
 func (e *entity) internalSetParent(parent IEntity) {
 	e.parent = parent
 	e.internalSetDirty()
@@ -120,8 +150,12 @@ func (e *entity) Dispose() {
 	for _, child := range e.Children() {
 		child.Dispose()
 	}
+
 	e.children = nil
 	e.parent = nil
+
+	e.ITransform = nil
+	e.IRender = nil
 }
 
 // ========================================================================
@@ -129,13 +163,18 @@ func (e *entity) Dispose() {
 // ========================================================================
 
 func (e *entity) Render(target *ebiten.Image, view ebiten.GeoM, matrix ebiten.GeoM) {
-	if len(e.Children()) == 0 {
+	if len(e.Children()) == 0 && e.IRender == nil {
 		return
 	}
 
-	matrix.Concat(e.WorldMatrix())
+	transformMatrix := e.LocalMatrix()
+	transformMatrix.Concat(matrix)
+
+	if e.IRender != nil {
+		e.IRender.Render(target, view, transformMatrix)
+	}
 
 	for _, child := range e.Children() {
-		child.Render(target, view, matrix)
+		child.Render(target, view, transformMatrix)
 	}
 }

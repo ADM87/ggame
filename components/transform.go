@@ -1,6 +1,8 @@
 package components
 
 import (
+	"math"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -13,6 +15,7 @@ type transform struct {
 	ox, oy  float64     // Origin x and y coordinates for the transform
 	sx, sy  float64     // Scale factors for the transform
 	radians float64     // Rotation in radians for the transform
+	degrees float64     // Rotation in degrees for the transform
 	matrix  ebiten.GeoM // Transformation matrix for the transform
 	isDirty bool        // isDirty indicates if the transform has changed since the last update
 }
@@ -27,6 +30,7 @@ func NewTransform() ITransform {
 		sx:      1,
 		sy:      1,
 		radians: 0,
+		degrees: 0,
 		isDirty: true,
 		matrix:  ebiten.GeoM{},
 	}
@@ -42,7 +46,7 @@ func (t *transform) Matrix() ebiten.GeoM {
 		t.matrix.Translate(-t.ox, -t.oy) // Translate to origin
 		t.matrix.Rotate(t.radians)       // Apply rotation
 		t.matrix.Scale(t.sx, t.sy)       // Apply scale
-		t.matrix.Translate(t.x, t.y)     // Translate to position
+		t.matrix.Translate(t.x, t.y)     // Translate to position first
 		t.isDirty = false
 	}
 	return t.matrix
@@ -93,14 +97,19 @@ func (t *transform) SetOrigin(ox, oy float64) {
 // =======================================================================
 
 func (t *transform) Rotation() float64 {
-	return t.radians
+	return t.degrees
 }
 
-func (t *transform) SetRotation(radians float64) {
-	if t.radians == radians {
+func (t *transform) SetRotation(degrees float64) {
+	wrapped := math.Mod(degrees, 360.0)
+	if wrapped < 0 {
+		wrapped += 360.0
+	}
+	if t.degrees == wrapped {
 		return
 	}
-	t.radians = radians
+	t.degrees = wrapped
+	t.radians = wrapped * 0.0174532925199 // Convert degrees to radians
 	t.SetDirty()
 }
 

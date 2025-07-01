@@ -3,7 +3,10 @@ package game
 import (
 	"image/color"
 
+	"github.com/ADM87/ggame/components"
+	"github.com/ADM87/ggame/entities"
 	"github.com/ADM87/ggame/keyboard"
+	"github.com/ADM87/ggame/resources"
 	"github.com/ADM87/ggame/sys"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -22,14 +25,43 @@ type Game interface {
 }
 
 type gameshell struct {
+	entities []entities.IEntity
+	entity   entities.IEntity // For testing purposes
+	child    entities.IEntity // For testing purposes
 }
 
 func NewGame() Game {
-	return &gameshell{}
+	return &gameshell{
+		entities: make([]entities.IEntity, 0),
+		entity:   nil, // Will be set in Start()
+	}
 }
 
 func (g *gameshell) Start() error {
 	g.RegisterKeys()
+
+	tile0000Image := resources.LoadImage("tile_0000")
+	tile0010Image := resources.LoadImage("tile_0010")
+
+	tile0000Renderer := components.NewSpriteRenderer()
+	tile0000Renderer.SetImage(tile0000Image)
+
+	tile0010Renderer := components.NewSpriteRenderer()
+	tile0010Renderer.SetImage(tile0010Image)
+
+	g.child = entities.NewEntity()
+	g.child.SetRenderer(tile0010Renderer)
+	g.child.SetScale(0.5, 0.5)
+	g.child.SetPosition(0, 0)
+	g.child.SetOrigin(12, 12)
+
+	g.entity = entities.NewEntity()
+	g.entity.SetRenderer(tile0000Renderer)
+	g.entity.SetPosition(float64(ScreenWidth/2), float64(ScreenHeight/2))
+	g.entity.SetOrigin(12, 12)
+	g.entity.SetScale(2, 2)
+	g.entity.AddChild(g.child)
+	g.entities = append(g.entities, g.entity)
 
 	return ebiten.RunGame(g)
 }

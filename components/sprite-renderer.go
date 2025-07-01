@@ -6,6 +6,7 @@ import (
 )
 
 type spriteRenderer struct {
+	ax, ay      float64
 	image       *ebiten.Image
 	drawOptions *ebiten.DrawImageOptions
 }
@@ -15,6 +16,19 @@ func NewSpriteRenderer() ISpriteRenderer {
 		image:       resources.DefaultImage(),
 		drawOptions: &ebiten.DrawImageOptions{},
 	}
+}
+
+// =======================================================================
+// IAnchor Implementation
+// =======================================================================
+
+func (sr *spriteRenderer) Anchor() (ax, ay float64) {
+	return sr.ax, sr.ay
+}
+
+func (sr *spriteRenderer) SetAnchor(ax, ay float64) {
+	sr.ax = ax
+	sr.ay = ay
 }
 
 // =======================================================================

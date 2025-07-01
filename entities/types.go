@@ -1,4 +1,4 @@
-package objects
+package entities
 
 import (
 	"github.com/ADM87/ggame/components"
@@ -10,6 +10,7 @@ import (
 // IEntity Interface
 // ========================================================================
 
+// IEntity defines the interface for a game entity that can be transformed, rendered, and managed in a scene graph.
 type IEntity interface {
 	components.IMovable
 	components.IOrigin
@@ -26,6 +27,9 @@ type IEntity interface {
 
 	LocalMatrix() ebiten.GeoM // LocalMatrix retrieves the local transformation matrix of the entity
 	WorldMatrix() ebiten.GeoM // WorldMatrix retrieves the world transformation matrix of the entity
+
+	Renderer() components.IRender            // Renderer retrieves the renderer component of the entity
+	SetRenderer(renderer components.IRender) // SetRenderer sets the renderer for the entity
 
 	// internalSetParent sets the parent entity of the current entity
 	//

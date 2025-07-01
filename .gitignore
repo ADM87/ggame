@@ -25,8 +25,8 @@
 !keyboard/
 !keyboard/**/*
 
-!objects/
-!objects/**/*
+!entities/
+!entities/**/*
 
 !resources/
 !resources/**/*

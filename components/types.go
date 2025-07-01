@@ -15,6 +15,7 @@ type IRender interface {
 
 // ISpriteRenderer defines the interface for a sprite rendering component
 type ISpriteRenderer interface {
+	IAnchor
 	IRender
 
 	GetImage() *ebiten.Image    // GetImage retrieves the image used for rendering
@@ -24,6 +25,15 @@ type ISpriteRenderer interface {
 	SetColorScale(cs ebiten.ColorScale) // SetColorScale sets the color scale for rendering
 	SetFilter(filter ebiten.Filter)     // SetFilter sets the filter for rendering
 	SetMipMaps(toggle bool)             // UseMipMaps enables or disables mipmaps for the renderer
+}
+
+// ========================================================================
+// Spatial Interfaces
+// ========================================================================
+
+type IAnchor interface {
+	Anchor() (ax, ay float64) // Anchor retrieves the current anchor point of the component
+	SetAnchor(ax, ay float64) // SetAnchor sets the anchor point to the specified coordinates
 }
 
 // =======================================================================
@@ -44,8 +54,8 @@ type IOrigin interface {
 
 // IRotatable defines the interface for a component that can be rotated in the game world.
 type IRotatable interface {
-	Rotation() float64           // Rotation retrieves the current rotation in radians
-	SetRotation(radians float64) // SetRotation sets the rotation in radians
+	Rotation() float64           // Rotation retrieves the current rotation in degrees
+	SetRotation(degrees float64) // SetRotation sets the rotation in degrees
 }
 
 // IScalable defines the interface for a component that can be scaled in the game world.

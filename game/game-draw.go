@@ -10,5 +10,9 @@ import (
 func (g *gameshell) Draw(renderTarget *ebiten.Image) {
 	renderTarget.Fill(backgroundColor)
 
-	ebitenutil.DebugPrint(renderTarget, fmt.Sprintf("TPS: %0.2f\nFPS: %0.2f", ebiten.ActualTPS(), ebiten.ActualFPS()))
+	for _, entity := range g.entities {
+		entity.Render(renderTarget, ebiten.GeoM{}, ebiten.GeoM{})
+	}
+
+	ebitenutil.DebugPrint(renderTarget, fmt.Sprintf("%0.2f", g.entity.Rotation()))
 }
