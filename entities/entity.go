@@ -9,7 +9,8 @@ import (
 
 type entity struct {
 	components.ITransform
-	components.IRender
+	components.IRenderer
+	components.IUpdatable
 
 	children []IEntity // List of child entities
 	parent   IEntity   // Parent entity
@@ -24,7 +25,7 @@ type entity struct {
 func NewEntity() IEntity {
 	return &entity{
 		ITransform:       components.NewTransform(),
-		IRender:          nil, // Renderer can be set later
+		IRenderer:        nil, // Renderer can be set later
 		children:         make([]IEntity, 0),
 		parent:           nil,
 		worldMatrix:      ebiten.GeoM{},
@@ -115,12 +116,12 @@ func (e *entity) WorldMatrix() ebiten.GeoM {
 	return e.worldMatrix
 }
 
-func (e *entity) Renderer() components.IRender {
-	return e.IRender
+func (e *entity) Renderer() components.IRenderer {
+	return e.IRenderer
 }
 
-func (e *entity) SetRenderer(renderer components.IRender) {
-	e.IRender = renderer
+func (e *entity) SetRenderer(renderer components.IRenderer) {
+	e.IRenderer = renderer
 }
 
 func (e *entity) internalSetParent(parent IEntity) {
@@ -150,7 +151,7 @@ func (e *entity) Dispose() {
 	e.parent = nil
 
 	e.ITransform = nil
-	e.IRender = nil
+	e.IRenderer = nil
 }
 
 // ========================================================================
@@ -158,18 +159,26 @@ func (e *entity) Dispose() {
 // ========================================================================
 
 func (e *entity) Render(target *ebiten.Image, view ebiten.GeoM, matrix ebiten.GeoM) {
-	if len(e.Children()) == 0 && e.IRender == nil {
+	if len(e.Children()) == 0 && e.IRenderer == nil {
 		return
 	}
 
 	transformMatrix := e.LocalMatrix()
 	transformMatrix.Concat(matrix)
 
-	if e.IRender != nil {
-		e.IRender.Render(target, view, transformMatrix)
+	if e.IRenderer != nil {
+		e.IRenderer.Render(target, view, transformMatrix)
 	}
 
 	for _, child := range e.Children() {
 		child.Render(target, view, transformMatrix)
 	}
+}
+
+// ========================================================================
+// IUpdatable Implementation
+// ========================================================================
+
+func (e *entity) Update(dt float64) {
+
 }

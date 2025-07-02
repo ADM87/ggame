@@ -5,18 +5,35 @@ import (
 )
 
 // ========================================================================
+// Logic Interfaces
+// ========================================================================
+
+type UpdateFunc[T IUpdatable] func(dt float64) // UpdateFunc defines a function type for updating components
+
+type IUpdatable interface {
+	Update(dt float64) // Update performs the logic update for the component
+}
+
+type IUpdater[T IUpdatable] interface {
+	IUpdatable
+
+	Add(updateFunc UpdateFunc[T])    // Add adds a new component to the updater
+	Remove(updateFunc UpdateFunc[T]) // Remove removes a component from the updater
+}
+
+// ========================================================================
 // Rendering Interfaces
 // ========================================================================
 
-// IRender defines a basic interface for a rendering components
-type IRender interface {
+// IRenderer defines a basic interface for a rendering components
+type IRenderer interface {
 	Render(target *ebiten.Image, view ebiten.GeoM, matrix ebiten.GeoM) // Render draws the component onto the target image
 }
 
 // ISpriteRenderer defines the interface for a sprite rendering component
 type ISpriteRenderer interface {
 	IAnchor
-	IRender
+	IRenderer
 
 	GetImage() *ebiten.Image    // GetImage retrieves the image used for rendering
 	SetImage(img *ebiten.Image) // SetImage sets the image used for rendering
@@ -27,18 +44,14 @@ type ISpriteRenderer interface {
 	SetMipMaps(toggle bool)             // UseMipMaps enables or disables mipmaps for the renderer
 }
 
-// ========================================================================
-// Spatial Interfaces
-// ========================================================================
+// =======================================================================
+// Transformation Interfaces
+// =======================================================================
 
 type IAnchor interface {
 	Anchor() (ax, ay float64) // Anchor retrieves the current anchor point of the component
 	SetAnchor(ax, ay float64) // SetAnchor sets the anchor point to the specified coordinates
 }
-
-// =======================================================================
-// Transformation Interfaces
-// =======================================================================
 
 // IMovable defines the interface for a component that can be moved in the game world.
 type IMovable interface {
