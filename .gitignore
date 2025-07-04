@@ -16,8 +16,8 @@
 !cmd/
 !cmd/**/*
 
-!components/
-!components/**/*
+!core/
+!core/**/*
 
 !game/
 !game/**/*
@@ -25,14 +25,11 @@
 !keyboard/
 !keyboard/**/*
 
-!entities/
-!entities/**/*
+!rendering/
+!rendering/**/*
 
 !resources/
 !resources/**/*
 
 !sys/
 !sys/**/*
-
-!world/
-!world/**/*

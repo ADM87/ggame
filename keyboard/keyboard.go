@@ -59,33 +59,32 @@ func UnregisterKey(key ebiten.Key) {
 	}
 }
 
-func Update() error {
+func Update() {
 	for key, actions := range keyRegistry {
 		switch {
 		case inpututil.IsKeyJustPressed(key):
 			if action, exists := actions[KeyPhaseDown]; exists {
 				if err := action(); err != nil {
-					return err
+					panic(err)
 				}
 			}
 		case inpututil.IsKeyJustReleased(key):
 			if action, exists := actions[KeyPhaseUp]; exists {
 				if err := action(); err != nil {
-					return err
+					panic(err)
 				}
 			}
 		case ebiten.IsKeyPressed(key):
 			if action, exists := actions[KeyPhaseHeld]; exists {
 				if err := action(); err != nil {
-					return err
+					panic(err)
 				}
 			}
 		}
 
 		if len(keyRegistry) == 0 {
 			sys.Logger().Warnf("Key %s purged key phase actions, unable to continue processing", key)
-			return nil
+			return
 		}
 	}
-	return nil
 }

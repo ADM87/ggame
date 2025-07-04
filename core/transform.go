@@ -1,8 +1,9 @@
-package components
+package core
 
 import (
 	"math"
 
+	"github.com/ADM87/ggame/sys"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -108,7 +109,7 @@ func (t *transform) SetRotation(degrees float64) {
 		return
 	}
 	t.degrees = wrapped
-	t.radians = wrapped * 0.0174532925199 // Convert degrees to radians
+	t.radians = wrapped * sys.DegToRads
 	t.SetDirty()
 }
 

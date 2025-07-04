@@ -1,24 +1,41 @@
-package components
+package core
 
 import (
+	"github.com/ADM87/ggame/sys/types"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // ========================================================================
-// Logic Interfaces
+// IEntity Interface
 // ========================================================================
 
-type UpdateFunc[T IUpdatable] func(dt float64) // UpdateFunc defines a function type for updating components
+// IEntity defines the interface for a game entity that can be transformed, rendered, and managed in a scene graph.
+type IEntity interface {
+	IMovable
+	IRenderer
+	IRotatable
+	IScalable
 
-type IUpdatable interface {
-	Update(dt float64) // Update performs the logic update for the component
-}
+	types.IDisposable
 
-type IUpdater[T IUpdatable] interface {
-	IUpdatable
+	AddChild(child IEntity)    // AddChild adds a child entity to the current entity
+	RemoveChild(child IEntity) // RemoveChild removes a child entity from the current entity
+	Children() []IEntity       // Children retrieves the list of child entities
+	Parent() IEntity           // Parent retrieves the parent entity of the current entity
 
-	Add(updateFunc UpdateFunc[T])    // Add adds a new component to the updater
-	Remove(updateFunc UpdateFunc[T]) // Remove removes a component from the updater
+	WorldMatrix() ebiten.GeoM // WorldMatrix retrieves the world transformation matrix of the entity
+
+	Renderer() IRenderer            // Renderer retrieves the renderer component of the entity
+	SetRenderer(renderer IRenderer) // SetRenderer sets the renderer for the entity
+
+	// internalSetParent sets the parent entity of the current entity
+	//
+	// This method is intended for internal use and should not be called directly.
+	internalSetParent(parent IEntity)
+	// internalSetDirty marks the entity as dirty, indicating that its transformation matrix needs to be recalculated
+	//
+	// This method is intended for internal use and should not be called directly.
+	internalSetDirty()
 }
 
 // ========================================================================

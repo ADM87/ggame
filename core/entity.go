@@ -1,16 +1,14 @@
-package entities
+package core
 
 import (
 	"slices"
 
-	"github.com/ADM87/ggame/components"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type entity struct {
-	components.ITransform
-	components.IRenderer
-	components.IUpdatable
+	ITransform
+	IRenderer
 
 	children []IEntity // List of child entities
 	parent   IEntity   // Parent entity
@@ -24,7 +22,7 @@ type entity struct {
 // Disposing of an entity will also dispose of its children. Referening a disposed entity will result in unexpected behavior.
 func NewEntity() IEntity {
 	return &entity{
-		ITransform:       components.NewTransform(),
+		ITransform:       NewTransform(),
 		IRenderer:        nil, // Renderer can be set later
 		children:         make([]IEntity, 0),
 		parent:           nil,
@@ -99,10 +97,6 @@ func (e *entity) Parent() IEntity {
 	return e.parent
 }
 
-func (e *entity) LocalMatrix() ebiten.GeoM {
-	return e.Matrix()
-}
-
 func (e *entity) WorldMatrix() ebiten.GeoM {
 	if e.worldMatrixDirty {
 		if e.parent != nil {
@@ -116,11 +110,11 @@ func (e *entity) WorldMatrix() ebiten.GeoM {
 	return e.worldMatrix
 }
 
-func (e *entity) Renderer() components.IRenderer {
+func (e *entity) Renderer() IRenderer {
 	return e.IRenderer
 }
 
-func (e *entity) SetRenderer(renderer components.IRenderer) {
+func (e *entity) SetRenderer(renderer IRenderer) {
 	e.IRenderer = renderer
 }
 
@@ -163,7 +157,7 @@ func (e *entity) Render(target *ebiten.Image, view ebiten.GeoM, matrix ebiten.Ge
 		return
 	}
 
-	transformMatrix := e.LocalMatrix()
+	transformMatrix := e.Matrix()
 	transformMatrix.Concat(matrix)
 
 	if e.IRenderer != nil {
@@ -173,12 +167,4 @@ func (e *entity) Render(target *ebiten.Image, view ebiten.GeoM, matrix ebiten.Ge
 	for _, child := range e.Children() {
 		child.Render(target, view, transformMatrix)
 	}
-}
-
-// ========================================================================
-// IUpdatable Implementation
-// ========================================================================
-
-func (e *entity) Update(dt float64) {
-
 }

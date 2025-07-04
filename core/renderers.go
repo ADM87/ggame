@@ -1,4 +1,4 @@
-package components
+package core
 
 import (
 	"github.com/ADM87/ggame/resources"

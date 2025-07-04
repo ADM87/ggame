@@ -3,13 +3,13 @@ package game
 import (
 	"fmt"
 
-	"github.com/ADM87/ggame/components"
+	"github.com/ADM87/ggame/core"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 var (
-	renderables = make([]components.IRenderer, 0)
+	renderables = make([]core.IRenderer, 0)
 )
 
 func (g *gameshell) Draw(renderTarget *ebiten.Image) {
