@@ -3,10 +3,14 @@ package game
 import (
 	"image/color"
 
-	"github.com/ADM87/ggame/core"
+	"github.com/ADM87/ggame/components"
+	"github.com/ADM87/ggame/ecs"
 	"github.com/ADM87/ggame/keyboard"
+	"github.com/ADM87/ggame/rendering"
 	"github.com/ADM87/ggame/resources"
 	"github.com/ADM87/ggame/sys"
+	"github.com/ADM87/ggame/systems"
+	"github.com/ADM87/ggame/world"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -18,10 +22,8 @@ const (
 var (
 	backgroundColor = color.RGBA{100, 149, 237, 255}
 
-	tile0000Renderer core.ISpriteRenderer
-	tile0010Renderer core.ISpriteRenderer
-
-	moveX, moveY float64
+	tile0000Renderer rendering.ISpriteRenderer
+	tile0010Renderer rendering.ISpriteRenderer
 )
 
 type Game interface {
@@ -29,55 +31,46 @@ type Game interface {
 }
 
 type gameshell struct {
+	systems map[ecs.ECSTypeID]ecs.ISystem
+
+	player components.IActor
+	block  components.IActor
+	camera components.ICamera
 }
 
 func NewGame() Game {
-	return &gameshell{}
-}
-
-func (g *gameshell) Start() error {
-	g.RegisterKeys()
-
-	tile0000Renderer = core.NewSpriteRenderer()
+	tile0000Renderer = rendering.NewSpriteRenderer()
 	tile0000Renderer.SetImage(resources.LoadImage("tile_0000"))
 	tile0000Renderer.SetAnchor(0.5, 1)
 
-	tile0010Renderer = core.NewSpriteRenderer()
+	tile0010Renderer = rendering.NewSpriteRenderer()
 	tile0010Renderer.SetImage(resources.LoadImage("tile_0010"))
-	tile0010Renderer.SetAnchor(0.5, 0)
+	tile0010Renderer.SetAnchor(0.5, 0.5)
+	return &gameshell{
+		systems: make(map[ecs.ECSTypeID]ecs.ISystem),
 
-	hw, hh := float64(ScreenWidth)*0.5, float64(ScreenHeight)*0.5
-
-	g.CreateTest(hw, hh)
-
-	return ebiten.RunGame(g)
+		player: NewActor(),
+		block:  NewActor(),
+		camera: NewCamera(),
+	}
 }
 
-func (g *gameshell) CreateTest(x, y float64) core.IEntity {
-	grandchildA := core.NewEntity()
-	grandchildA.SetRenderer(tile0000Renderer)
-	grandchildA.SetPosition(9, 0)
-	grandchildA.SetScale(0.5, 0.5)
+func (g *gameshell) Start() error {
+	g.RegisterSystems()
+	g.RegisterKeys()
 
-	grandchildB := core.NewEntity()
-	grandchildB.SetRenderer(tile0000Renderer)
-	grandchildB.SetPosition(-9, 0)
-	grandchildB.SetScale(0.5, 0.5)
+	g.player.RenderComponent().SetRenderer(tile0000Renderer)
+	g.block.RenderComponent().SetRenderer(tile0010Renderer)
 
-	child := core.NewEntity()
-	child.SetRenderer(tile0010Renderer)
-	child.SetPosition(0, 10)
-	child.AddChild(grandchildA)
-	child.AddChild(grandchildB)
+	g.block.Transform().SetPosition(0, 10)
+	g.player.Transform().SetScale(2, 2)
 
-	parent := core.NewEntity()
-	parent.SetRenderer(tile0000Renderer)
-	parent.SetPosition(x, y)
-	parent.AddChild(child)
+	g.player.GetEntity().AddChild(g.block.GetEntity())
 
-	renderables = append(renderables, parent)
+	world.AddEntity(g.player.GetEntity())
+	world.AddEntity(g.camera.GetEntity())
 
-	return parent
+	return ebiten.RunGame(g)
 }
 
 func (g *gameshell) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -99,39 +92,39 @@ func (g *gameshell) RegisterKeys() {
 		return nil
 	})
 
-	keyboard.RegisterKey(ebiten.KeyArrowUp, keyboard.KeyPhaseHeld, func() error {
-		moveY = -1.0
+	keyboard.RegisterKey(ebiten.KeyW, keyboard.KeyPhaseHeld, func() error {
+		x, y := g.camera.GetPosition()
+		g.camera.SetPosition(x, y-1)
 		return nil
 	})
-	keyboard.RegisterKey(ebiten.KeyArrowUp, keyboard.KeyPhaseUp, func() error {
-		moveY = 0.0
+	keyboard.RegisterKey(ebiten.KeyS, keyboard.KeyPhaseHeld, func() error {
+		x, y := g.camera.GetPosition()
+		g.camera.SetPosition(x, y+1)
 		return nil
 	})
-
-	keyboard.RegisterKey(ebiten.KeyArrowDown, keyboard.KeyPhaseHeld, func() error {
-		moveY = 1.0
+	keyboard.RegisterKey(ebiten.KeyA, keyboard.KeyPhaseHeld, func() error {
+		x, y := g.camera.GetPosition()
+		g.camera.SetPosition(x-1, y)
 		return nil
 	})
-	keyboard.RegisterKey(ebiten.KeyArrowDown, keyboard.KeyPhaseUp, func() error {
-		moveY = 0.0
-		return nil
-	})
-
-	keyboard.RegisterKey(ebiten.KeyArrowLeft, keyboard.KeyPhaseHeld, func() error {
-		moveX = -1.0
-		return nil
-	})
-	keyboard.RegisterKey(ebiten.KeyArrowLeft, keyboard.KeyPhaseUp, func() error {
-		moveX = 0.0
+	keyboard.RegisterKey(ebiten.KeyD, keyboard.KeyPhaseHeld, func() error {
+		x, y := g.camera.GetPosition()
+		g.camera.SetPosition(x+1, y)
 		return nil
 	})
 
-	keyboard.RegisterKey(ebiten.KeyArrowRight, keyboard.KeyPhaseHeld, func() error {
-		moveX = 1.0
+	keyboard.RegisterKey(ebiten.KeyMinus, keyboard.KeyPhaseHeld, func() error {
+		zoom := g.camera.GetZoom() + 0.01
+		g.camera.SetZoom(zoom)
 		return nil
 	})
-	keyboard.RegisterKey(ebiten.KeyArrowRight, keyboard.KeyPhaseUp, func() error {
-		moveX = 0.0
+	keyboard.RegisterKey(ebiten.KeyEqual, keyboard.KeyPhaseHeld, func() error {
+		zoom := g.camera.GetZoom() - 0.01
+		g.camera.SetZoom(zoom)
 		return nil
 	})
+}
+
+func (g *gameshell) RegisterSystems() {
+	g.systems[systems.RenderSystemTypeID] = systems.NewRenderSystem()
 }

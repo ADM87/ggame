@@ -33,3 +33,15 @@
 
 !sys/
 !sys/**/*
+
+!systems/
+!systems/**/*
+
+!world/
+!world/**/*
+
+!components/
+!components/**/*
+
+!ecs/
+!ecs/**/*

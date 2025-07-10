@@ -4,12 +4,14 @@ import (
 	"time"
 
 	"github.com/ADM87/ggame/keyboard"
+	"github.com/ADM87/ggame/systems"
+	"github.com/ADM87/ggame/world"
 )
 
 var (
 	maxDeltaTime = 1.0 / 30.0 // Cap delta time to 30 FPS minimum (33ms max)
-	lastTime     = time.Time{}
 	targetDT     = 1.0 / 60.0 // Target 60 FPS (16.67ms)
+	lastTime     = time.Time{}
 )
 
 func (g *gameshell) Update() error {
@@ -36,6 +38,22 @@ func (g *gameshell) Update() error {
 	}
 
 	keyboard.Update()
+
+	rotation := g.block.Transform().GetRotation()
+	rotation += dt * 100
+	if rotation >= 360 {
+		rotation -= 360
+	}
+	g.block.Transform().SetRotation(rotation)
+
+	rotation = g.player.Transform().GetRotation()
+	rotation -= dt * 50
+	if rotation < 0 {
+		rotation += 360
+	}
+	g.player.Transform().SetRotation(rotation)
+
+	g.systems[systems.RenderSystemTypeID].Update(world.FilterEntities(g.systems[systems.RenderSystemTypeID].Filter()...), dt)
 
 	return nil
 }
